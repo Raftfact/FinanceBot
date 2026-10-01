@@ -1,0 +1,15 @@
+fastapi==0.115.0
+uvicorn[standard]==0.32.0
+
+aiogram==3.13.1
+
+sqlalchemy==2.0.36
+asyncpg==0.30.0
+alembic==1.13.3
+greenlet==3.0.3
+
+pydantic==2.9.2
+pydantic-settings==2.6.1
+python-dotenv==1.0.1
+
+python-dateutil==2.9.0
