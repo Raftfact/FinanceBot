@@ -3,42 +3,38 @@ from typing import Optional, Tuple
 from decimal import Decimal, InvalidOperation
 
 
-def parse_transaction_message(text: str) -> Tuple[Optional[Decimal], str]:
-    """
-    Парсит сообщение вида "350 кофе" или "5000 зарплата"
-    Возвращает (amount, comment)
-    """
+def parse_transaction_message(text: str):
     text = text.strip()
-    
-    match = re.match(r'^(\d+(?:[.,]\d{1,2})?)\s+(.+)$', text)
-    
-    if not match:
-        return None, text
-    
-    amount_str = match.group(1).replace(',', '.')
-    comment = match.group(2).strip()
-    
-    try:
-        amount = Decimal(amount_str)
-        if amount <= 0:
-            return None, text
-        return amount, comment
-    except InvalidOperation:
-        return None, text
 
-
-def determine_category_by_comment(comment: str) -> Optional[str]:
-    comment_lower = comment.lower()
-    
-    category_keywords = {
-        "Еда": ["кофе", "чай", "хлеб", "молоко", "ресторан", "кафе", "обед", "ужин"],
-        "Транспорт": ["такси", "метро", "бензин", "автобус", "электричка"],
-        "Развлечения": ["кино", "театр", "концерт", "игр", "подписк"],
-        "Зарплата": ["зарплата", "зарплат", "аванс"],
+    transaction = {
+        "amount": None,
+        "operation": None,
+        "comment": None
     }
-    
-    for category, keywords in category_keywords.items():
-        if any(keyword in comment_lower for keyword in keywords):
-            return category
-    
-    return "Прочее"
+
+    digit = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+
+    if text[0] == '+':
+        transaction["operation"] = "+"
+        text = text[1:].strip()
+    elif text[0] == '-':
+        transaction["operation"] = "-"
+        text = text[1:].strip()
+    elif text[0] in digit:
+        transaction["operation"] = "-"
+    else:
+        return None
+
+    for i in text:
+        if i not in digit and i != "." and i != ",":
+            break
+        transaction["amount"] = (transaction["amount"] or "") + i
+
+    text = text[len(transaction["amount"]):].strip()
+
+    if transaction["amount"] is None:
+        return None
+
+    transaction["comment"] = text if text else None
+
+    return transaction

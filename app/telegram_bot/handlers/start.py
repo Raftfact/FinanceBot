@@ -6,8 +6,26 @@ from app.services.user_service import get_user
 
 router = Router()
 
+help_message = (
+    "Вот что я умею:\n"
+    "- Записываю доходы и расходы\n"
+    "- Создаю категории расходов\n"
+    "- Формирую отчёты по расходам\n\n"
+    "Чтобы записать транзакцию, просто напиши её в формате:\n"
+    "<+/-> <сумма> <описание>\n"
+    "Например: +450 кофе или -200 транспорт\n\n"
+    "Если не поставить знак + или -, то я буду считать это расходом.\n\n"
+    "Чтобы создать категорию, используй команду /create_category <название категории>\n"
+    "Или создай категорию прямо в процессе записи транзакции, когда я спрошу про категорию.\n\n"
+    "Чтобы получить отчёт, используй команду /report\n\n"
+    "Если нужна помощь, напиши /help."
+    )
 
 @router.message(Command("start"))
 async def cmd_start(message: types.Message, db: AsyncSession):
     user = await get_user(db, message.from_user.id, message.from_user.username)
-    await message.answer(f"Привет! Твой ID в системе: {user.id}")
+    await message.answer(f"Привет {user.username}! \n\n{help_message}")
+
+@router.message(Command("help"))
+async def cmd_help(message: types.Message):
+    await message.answer(help_message)
