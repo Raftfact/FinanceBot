@@ -2,7 +2,7 @@ from aiogram import Router, types
 from aiogram.filters import Command
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.services.user_service import get_user
+from app.services.user_service import get_user, get_balance
 
 router = Router()
 
@@ -14,7 +14,6 @@ help_message = (
     "Чтобы записать транзакцию, просто напиши её в формате:\n"
     "<+/-> <сумма> <описание>\n"
     "Например: +450 кофе или -200 транспорт\n\n"
-    "Если не поставить знак + или -, то я буду считать это расходом.\n\n"
     "Чтобы создать категорию, используй команду /create_category <название категории>\n"
     "Или создай категорию прямо в процессе записи транзакции, когда я спрошу про категорию.\n\n"
     "Чтобы получить отчёт, используй команду /report\n\n"
@@ -29,3 +28,9 @@ async def cmd_start(message: types.Message, db: AsyncSession):
 @router.message(Command("help"))
 async def cmd_help(message: types.Message):
     await message.answer(help_message)
+
+@router.message(Command("balance"))
+async def cmd_balance(message: types.Message, db: AsyncSession):
+    user = await get_user(db, message.from_user.id, message.from_user.username)
+    balance = await get_balance(db, user.id)
+    await message.answer(f"Ваш общий баланс: {balance}")

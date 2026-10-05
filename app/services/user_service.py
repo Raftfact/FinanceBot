@@ -1,6 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models.user import User
+from decimal import Decimal
 
 async def find_user(db: AsyncSession, telegram_id: int):
 
@@ -26,3 +27,22 @@ async def get_user(db: AsyncSession, user_id: int, username = None):
         return await create_user(db, user_id, username)
     elif find_us is not None: 
         return find_us
+
+async def update_balance(db: AsyncSession, user_id: int, amount: float):
+    query = select(User).where(User.id == user_id)
+    result = await db.execute(query)
+    user = result.scalar_one()
+
+    if user.balance is None:
+        user.balance = Decimal('0')
+    
+    user.balance += amount
+    await db.flush()
+    
+    return user.balance
+
+
+async def get_balance(db: AsyncSession, user_id: int) -> float:
+    query = select(User.balance).where(User.id == user_id)
+    result = await db.execute(query)
+    return result.scalar()
