@@ -1,7 +1,6 @@
 from aiogram import Router, types
 from aiogram.filters import Command
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.services.user_service import get_user, get_balance
 
 router = Router()

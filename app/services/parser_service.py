@@ -1,9 +1,8 @@
-import re
-from typing import Optional, Tuple
+from typing import Optional, Dict
 from decimal import Decimal, InvalidOperation
 
 
-def parse_transaction_message(text: str):
+def parse_transaction_message(text: str) -> Optional[Dict]:
     text = text.strip()
 
     transaction = {
@@ -25,14 +24,23 @@ def parse_transaction_message(text: str):
     else:
         return None
 
+    amount_str = ""
     for i in text:
         if i not in digit and i != "." and i != ",":
             break
-        transaction["amount"] = (transaction["amount"] or "") + i
+        amount_str += i
 
-    text = text[len(transaction["amount"]):].strip()
+    text = text[len(amount_str):].strip()
 
-    if transaction["amount"] is None:
+    if not amount_str:
+        return None
+
+    try:
+        amount = Decimal(amount_str.replace(',', '.'))
+        if amount <= 0:
+            return None
+        transaction["amount"] = amount
+    except InvalidOperation:
         return None
 
     transaction["comment"] = text if text else None
